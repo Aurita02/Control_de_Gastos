@@ -13,6 +13,12 @@ val Purple40 = Color(0xFF2E7D32)
 val PurpleGrey40 = Color(0xFF546E5A)
 val Pink40 = Color(0xFFC62828)
 
+//colores oscuros
+
+val ColorOscuro = Color(0xFF121712)
+val SuperficieOscura = Color(0xFF1D251E)
+
+
 // Colores personalizados para Control de Gastos
 val VerdePrincipal = Color(0xFF2E7D32)
 val VerdeClaro = Color(0xFF4CAF50)
