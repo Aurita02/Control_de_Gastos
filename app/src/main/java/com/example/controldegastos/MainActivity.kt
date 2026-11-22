@@ -15,11 +15,26 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.controldegastos.ui.theme.ControlDeGastosTheme
 
+import androidx.compose.runtime.remember
+import com.example.controldegastos.di.AppContainer
+import com.example.controldegastos.di.ViewModelFactory
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
+
+            val appContainer = remember {
+                AppContainer()
+            }
+
+            val dashboardFactory = remember(appContainer) {
+                ViewModelFactory(
+                    appContainer.gastosRepository
+                )
+            }
+
             ControlDeGastosTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
