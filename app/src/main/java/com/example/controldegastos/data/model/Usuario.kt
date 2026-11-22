@@ -1,5 +1,3 @@
-
-
 package com.example.controldegastos.data.model
 
 data class Usuario(
