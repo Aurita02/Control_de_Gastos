@@ -1,49 +1,30 @@
+
 package com.example.controldegastos
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.controldegastos.data.model.Gasto
 import com.example.controldegastos.ui.dashboard.DashboardUiState
 import java.util.Locale
 
-
-
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.dp
-
-
+// =====================================================
 // USUARIOS DE PRUEBA
+// Se mantienen para mostrar el nombre en el Dashboard.
+// La autenticación se realiza desde UsuariosRepository.
+// =====================================================
+
 data class Usuario(
     val username: String,
     val contrasena: String,
@@ -56,8 +37,9 @@ val usuariosRegistrados = listOf(
     Usuario("alexis", "12122024", "Jordan Alexis")
 )
 
+// =====================================================
 // 1. PANTALLA DE INICIO DE SESIÓN
-
+// =====================================================
 
 @Composable
 fun LoginScreen(
@@ -65,6 +47,7 @@ fun LoginScreen(
     error: String?,
     onIniciarSesion: (String, String) -> Unit
 ) {
+
     var username by rememberSaveable {
         mutableStateOf("")
     }
@@ -90,8 +73,12 @@ fun LoginScreen(
 
         OutlinedTextField(
             value = username,
-            onValueChange = { username = it },
-            label = { Text("Usuario") },
+            onValueChange = {
+                username = it
+            },
+            label = {
+                Text("Usuario")
+            },
             singleLine = true,
             enabled = !cargando,
             modifier = Modifier.fillMaxWidth()
@@ -101,8 +88,12 @@ fun LoginScreen(
 
         OutlinedTextField(
             value = contrasena,
-            onValueChange = { contrasena = it },
-            label = { Text("Contraseña") },
+            onValueChange = {
+                contrasena = it
+            },
+            label = {
+                Text("Contraseña")
+            },
             visualTransformation = PasswordVisualTransformation(),
             singleLine = true,
             enabled = !cargando,
@@ -110,6 +101,7 @@ fun LoginScreen(
         )
 
         if (error != null) {
+
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
@@ -130,33 +122,45 @@ fun LoginScreen(
             enabled = !cargando,
             modifier = Modifier.fillMaxWidth()
         ) {
+
             Text(
-                if (cargando) "Iniciando sesión..."
-                else "Iniciar Sesión"
+                text = if (cargando) {
+                    "Iniciando sesión..."
+                } else {
+                    "Iniciar Sesión"
+                }
             )
         }
     }
 }
 
-
+// =====================================================
 // 2. DASHBOARD CON ARQUITECTURA MVVM
+// =====================================================
+
 @Composable
 fun DashboardScreen(
     username: String,
     uiState: DashboardUiState,
     onNavigateToAdd: () -> Unit
 ) {
+
     val usuario = usuariosRegistrados.find {
-        it.username.equals(username, ignoreCase = true)
+        it.username.equals(
+            username,
+            ignoreCase = true
+        )
     }
 
     val nombreUsuario = usuario?.nombre ?: "Usuario"
 
     Scaffold(
         floatingActionButton = {
+
             FloatingActionButton(
                 onClick = onNavigateToAdd
             ) {
+
                 Text(
                     text = "+",
                     style = MaterialTheme.typography.headlineMedium
@@ -171,6 +175,7 @@ fun DashboardScreen(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
+
             Text(
                 text = "Gastos de $nombreUsuario",
                 style = MaterialTheme.typography.headlineMedium
@@ -179,6 +184,7 @@ fun DashboardScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             if (!uiState.cargando && uiState.error == null) {
+
                 Text(
                     text = "Total de gastos: $${
                         String.format(
@@ -195,11 +201,14 @@ fun DashboardScreen(
             }
 
             when {
+
                 uiState.cargando -> {
+
                     CircularProgressIndicator()
                 }
 
                 uiState.error != null -> {
+
                     Text(
                         text = uiState.error,
                         color = MaterialTheme.colorScheme.error
@@ -207,20 +216,23 @@ fun DashboardScreen(
                 }
 
                 uiState.gastos.isEmpty() -> {
+
                     Text(
-                        "No hay gastos registrados para este usuario."
+                        text = "No hay gastos registrados para este usuario."
                     )
                 }
 
                 else -> {
+
                     LazyColumn(
-                        verticalArrangement =
-                            Arrangement.spacedBy(8.dp)
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
+
                         items(
                             items = uiState.gastos,
                             key = { it.id }
                         ) { gasto ->
+
                             GastoCard(gasto)
                         }
                     }
@@ -230,9 +242,13 @@ fun DashboardScreen(
     }
 }
 
+// =====================================================
 // TARJETA DE GASTO
+// =====================================================
+
 @Composable
 fun GastoCard(gasto: Gasto) {
+
     val valorFormateado = String.format(
         Locale.US,
         "%.2f",
@@ -242,6 +258,7 @@ fun GastoCard(gasto: Gasto) {
     Card(
         modifier = Modifier.fillMaxWidth()
     ) {
+
         Text(
             text = "${gasto.descripcion} - $$valorFormateado " +
                     "(${gasto.categoria} - ${gasto.metodoPago})",
@@ -251,7 +268,9 @@ fun GastoCard(gasto: Gasto) {
     }
 }
 
-// 3. PANTALLA REGISTRAR GASTO
+// =====================================================
+// 3. PANTALLA PARA REGISTRAR GASTOS
+// =====================================================
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -265,6 +284,7 @@ fun AgregarGastoScreen(
         metodoPago: String
     ) -> Unit
 ) {
+
     var descripcion by rememberSaveable {
         mutableStateOf("")
     }
@@ -320,20 +340,32 @@ fun AgregarGastoScreen(
             style = MaterialTheme.typography.headlineMedium
         )
 
+        // CAMPO DESCRIPCIÓN
         OutlinedTextField(
             value = descripcion,
-            onValueChange = { descripcion = it },
-            label = { Text("Descripción") },
+            onValueChange = {
+                descripcion = it
+            },
+            label = {
+                Text("Descripción")
+            },
             singleLine = true,
             enabled = !guardando,
             modifier = Modifier.fillMaxWidth()
         )
 
+        // CAMPO VALOR
         OutlinedTextField(
             value = valor,
-            onValueChange = { valor = it },
-            label = { Text("Valor del gasto") },
-            prefix = { Text("$") },
+            onValueChange = {
+                valor = it
+            },
+            label = {
+                Text("Valor del gasto")
+            },
+            prefix = {
+                Text("$")
+            },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Decimal
             ),
@@ -342,6 +374,7 @@ fun AgregarGastoScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
+        // MENÚ DESPLEGABLE DE CATEGORÍAS
         ExposedDropdownMenuBox(
             expanded = categoriaExpandida,
             onExpandedChange = {
@@ -350,11 +383,14 @@ fun AgregarGastoScreen(
                 }
             }
         ) {
+
             OutlinedTextField(
                 value = categoria,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Categoría") },
+                label = {
+                    Text("Categoría")
+                },
                 trailingIcon = {
                     ExposedDropdownMenuDefaults.TrailingIcon(
                         expanded = categoriaExpandida
@@ -362,7 +398,10 @@ fun AgregarGastoScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .menuAnchor(),
+                    .menuAnchor(
+                        type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                        enabled = !guardando
+                    ),
                 enabled = !guardando
             )
 
@@ -372,9 +411,13 @@ fun AgregarGastoScreen(
                     categoriaExpandida = false
                 }
             ) {
+
                 categorias.forEach { opcion ->
+
                     DropdownMenuItem(
-                        text = { Text(opcion) },
+                        text = {
+                            Text(opcion)
+                        },
                         onClick = {
                             categoria = opcion
                             categoriaExpandida = false
@@ -384,6 +427,7 @@ fun AgregarGastoScreen(
             }
         }
 
+        // MENÚ DESPLEGABLE DE MÉTODOS DE PAGO
         ExposedDropdownMenuBox(
             expanded = pagoExpandido,
             onExpandedChange = {
@@ -392,11 +436,14 @@ fun AgregarGastoScreen(
                 }
             }
         ) {
+
             OutlinedTextField(
                 value = metodoPago,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Método de pago") },
+                label = {
+                    Text("Método de pago")
+                },
                 trailingIcon = {
                     ExposedDropdownMenuDefaults.TrailingIcon(
                         expanded = pagoExpandido
@@ -404,7 +451,10 @@ fun AgregarGastoScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .menuAnchor(),
+                    .menuAnchor(
+                        type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                        enabled = !guardando
+                    ),
                 enabled = !guardando
             )
 
@@ -414,9 +464,13 @@ fun AgregarGastoScreen(
                     pagoExpandido = false
                 }
             ) {
+
                 metodosPago.forEach { opcion ->
+
                     DropdownMenuItem(
-                        text = { Text(opcion) },
+                        text = {
+                            Text(opcion)
+                        },
                         onClick = {
                             metodoPago = opcion
                             pagoExpandido = false
@@ -426,13 +480,16 @@ fun AgregarGastoScreen(
             }
         }
 
+        // MOSTRAR ERRORES AL GUARDAR
         if (error != null) {
+
             Text(
                 text = error,
                 color = MaterialTheme.colorScheme.error
             )
         }
 
+        // BOTÓN GUARDAR GASTO
         Button(
             onClick = {
                 onGuardarGasto(
@@ -445,11 +502,14 @@ fun AgregarGastoScreen(
             enabled = !guardando,
             modifier = Modifier.fillMaxWidth()
         ) {
+
             Text(
-                if (guardando) "Guardando..."
-                else "Guardar gasto"
+                text = if (guardando) {
+                    "Guardando..."
+                } else {
+                    "Guardar gasto"
+                }
             )
         }
     }
 }
-
