@@ -15,6 +15,34 @@ import com.example.controldegastos.data.model.Gasto
 import com.example.controldegastos.ui.dashboard.DashboardUiState
 import java.util.Locale
 
+
+
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+
+
 // USUARIOS DE PRUEBA
 data class Usuario(
     val username: String,
@@ -221,158 +249,204 @@ fun GastoCard(gasto: Gasto) {
 }
 
 // 3. PANTALLA REGISTRAR GASTO
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AgregarGastoScreen(
-    onGastoGuardado: () -> Unit
+    guardando: Boolean,
+    error: String?,
+    onGuardarGasto: (
+        descripcion: String,
+        valor: String,
+        categoria: String,
+        metodoPago: String
+    ) -> Unit
 ) {
-    var valor by remember { mutableStateOf("") }
+    var descripcion by rememberSaveable {
+        mutableStateOf("")
+    }
 
-    val listaCategorias = listOf(
+    var valor by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var categoria by rememberSaveable {
+        mutableStateOf("Alimentación")
+    }
+
+    var metodoPago by rememberSaveable {
+        mutableStateOf("Efectivo")
+    }
+
+    var categoriaExpandida by remember {
+        mutableStateOf(false)
+    }
+
+    var pagoExpandido by remember {
+        mutableStateOf(false)
+    }
+
+    val categorias = listOf(
         "Alimentación",
         "Transporte",
-        "Materiales Académicos",
-        "Servicios",
+        "Educación",
+        "Salud",
         "Entretenimiento",
-        "Compras Personales"
+        "Servicios",
+        "Compras",
+        "Otros"
     )
 
-    var categoriaSeleccionada by remember {
-        mutableStateOf(listaCategorias[0])
-    }
-
-    var expandirCategoria by remember {
-        mutableStateOf(false)
-    }
-
-    val listaMetodosPago = listOf(
+    val metodosPago = listOf(
         "Efectivo",
-        "Tarjeta de Débito",
-        "Tarjeta de Crédito",
-        "Transferencia Bancaria"
+        "Tarjeta de débito",
+        "Tarjeta de crédito",
+        "Transferencia"
     )
-
-    var metodoPagoSeleccionado by remember {
-        mutableStateOf(listaMetodosPago[0])
-    }
-
-    var expandirMetodoPago by remember {
-        mutableStateOf(false)
-    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(24.dp)
+            .padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+
         Text(
-            text = "Registrar Nuevo Gasto",
+            text = "Agregar gasto",
             style = MaterialTheme.typography.headlineMedium
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        OutlinedTextField(
+            value = descripcion,
+            onValueChange = { descripcion = it },
+            label = { Text("Descripción") },
+            singleLine = true,
+            enabled = !guardando,
+            modifier = Modifier.fillMaxWidth()
+        )
 
         OutlinedTextField(
             value = valor,
             onValueChange = { valor = it },
-            label = { Text("Valor ($)") },
+            label = { Text("Valor del gasto") },
+            prefix = { Text("$") },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Decimal
+            ),
+            singleLine = true,
+            enabled = !guardando,
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
-
         ExposedDropdownMenuBox(
-            expanded = expandirCategoria,
+            expanded = categoriaExpandida,
             onExpandedChange = {
-                expandirCategoria = !expandirCategoria
+                if (!guardando) {
+                    categoriaExpandida = !categoriaExpandida
+                }
             }
         ) {
             OutlinedTextField(
-                value = categoriaSeleccionada,
+                value = categoria,
                 onValueChange = {},
                 readOnly = true,
                 label = { Text("Categoría") },
                 trailingIcon = {
                     ExposedDropdownMenuDefaults.TrailingIcon(
-                        expanded = expandirCategoria
+                        expanded = categoriaExpandida
                     )
                 },
-                colors = ExposedDropdownMenuDefaults
-                    .outlinedTextFieldColors(),
                 modifier = Modifier
-                    .menuAnchor()
                     .fillMaxWidth()
+                    .menuAnchor(),
+                enabled = !guardando
             )
 
             ExposedDropdownMenu(
-                expanded = expandirCategoria,
+                expanded = categoriaExpandida,
                 onDismissRequest = {
-                    expandirCategoria = false
+                    categoriaExpandida = false
                 }
             ) {
-                listaCategorias.forEach { item ->
+                categorias.forEach { opcion ->
                     DropdownMenuItem(
-                        text = { Text(item) },
+                        text = { Text(opcion) },
                         onClick = {
-                            categoriaSeleccionada = item
-                            expandirCategoria = false
+                            categoria = opcion
+                            categoriaExpandida = false
                         }
                     )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
         ExposedDropdownMenuBox(
-            expanded = expandirMetodoPago,
+            expanded = pagoExpandido,
             onExpandedChange = {
-                expandirMetodoPago = !expandirMetodoPago
+                if (!guardando) {
+                    pagoExpandido = !pagoExpandido
+                }
             }
         ) {
             OutlinedTextField(
-                value = metodoPagoSeleccionado,
+                value = metodoPago,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Método de Pago") },
+                label = { Text("Método de pago") },
                 trailingIcon = {
                     ExposedDropdownMenuDefaults.TrailingIcon(
-                        expanded = expandirMetodoPago
+                        expanded = pagoExpandido
                     )
                 },
-                colors = ExposedDropdownMenuDefaults
-                    .outlinedTextFieldColors(),
                 modifier = Modifier
-                    .menuAnchor()
                     .fillMaxWidth()
+                    .menuAnchor(),
+                enabled = !guardando
             )
 
             ExposedDropdownMenu(
-                expanded = expandirMetodoPago,
+                expanded = pagoExpandido,
                 onDismissRequest = {
-                    expandirMetodoPago = false
+                    pagoExpandido = false
                 }
             ) {
-                listaMetodosPago.forEach { item ->
+                metodosPago.forEach { opcion ->
                     DropdownMenuItem(
-                        text = { Text(item) },
+                        text = { Text(opcion) },
                         onClick = {
-                            metodoPagoSeleccionado = item
-                            expandirMetodoPago = false
+                            metodoPago = opcion
+                            pagoExpandido = false
                         }
                     )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        if (error != null) {
+            Text(
+                text = error,
+                color = MaterialTheme.colorScheme.error
+            )
+        }
 
         Button(
-            onClick = onGastoGuardado,
+            onClick = {
+                onGuardarGasto(
+                    descripcion,
+                    valor,
+                    categoria,
+                    metodoPago
+                )
+            },
+            enabled = !guardando,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Guardar Gasto")
+            Text(
+                if (guardando) "Guardando..."
+                else "Guardar gasto"
+            )
         }
     }
 }
+

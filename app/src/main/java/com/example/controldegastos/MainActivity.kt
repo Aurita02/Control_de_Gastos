@@ -144,11 +144,22 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
 
+
                             AgregarGastoScreen(
-                                onGastoGuardado = {
-                                    // Se conectará en el paso 15.4
+                                guardando = agregarUiState.value.guardando,
+                                error = agregarUiState.value.error,
+                                onGuardarGasto = { descripcion, valor, categoria, metodoPago ->
+
+                                    agregarGastoViewModel.guardarGasto(
+                                        username = username,
+                                        descripcion = descripcion,
+                                        valor = valor,
+                                        categoria = categoria,
+                                        metodoPago = metodoPago
+                                    )
                                 }
                             )
+
                         }
                     }
                 }
