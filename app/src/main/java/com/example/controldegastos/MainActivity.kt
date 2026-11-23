@@ -21,6 +21,7 @@ import com.example.controldegastos.di.AppContainer
 import com.example.controldegastos.di.ViewModelFactory
 import com.example.controldegastos.ui.agregargasto.AgregarGastoViewModel
 import com.example.controldegastos.ui.dashboard.DashboardViewModel
+import com.example.controldegastos.ui.login.LoginViewModel
 import com.example.controldegastos.ui.theme.ControlDeGastosTheme
 
 class MainActivity : ComponentActivity() {
@@ -57,6 +58,16 @@ class MainActivity : ComponentActivity() {
                         // PANTALLA DE INICIO DE SESIÓN
                         composable(Screen.Login.route) {
 
+                            val loginViewModel: LoginViewModel = viewModel(
+                                factory = viewModelFactory
+                            )
+
+                            val loginUiState =
+                                loginViewModel.uiState
+                                    .collectAsStateWithLifecycle()
+
+                            // La validación se conectará
+                            // al ViewModel en el paso 16.3
                             LoginScreen(
                                 onLoginSuccess = { username ->
 
@@ -81,10 +92,10 @@ class MainActivity : ComponentActivity() {
                                 backStackEntry.arguments
                                     ?.getString("username") ?: ""
 
-                            val dashboardViewModel:
-                                    DashboardViewModel = viewModel(
-                                factory = viewModelFactory
-                            )
+                            val dashboardViewModel: DashboardViewModel =
+                                viewModel(
+                                    factory = viewModelFactory
+                                )
 
                             val uiState =
                                 dashboardViewModel.uiState
@@ -125,10 +136,10 @@ class MainActivity : ComponentActivity() {
                                 backStackEntry.arguments
                                     ?.getString("username") ?: ""
 
-                            val agregarGastoViewModel:
-                                    AgregarGastoViewModel = viewModel(
-                                factory = viewModelFactory
-                            )
+                            val agregarGastoViewModel: AgregarGastoViewModel =
+                                viewModel(
+                                    factory = viewModelFactory
+                                )
 
                             val agregarUiState =
                                 agregarGastoViewModel.uiState
@@ -144,11 +155,14 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
 
-
                             AgregarGastoScreen(
                                 guardando = agregarUiState.value.guardando,
                                 error = agregarUiState.value.error,
-                                onGuardarGasto = { descripcion, valor, categoria, metodoPago ->
+                                onGuardarGasto = {
+                                        descripcion,
+                                        valor,
+                                        categoria,
+                                        metodoPago ->
 
                                     agregarGastoViewModel.guardarGasto(
                                         username = username,
@@ -159,7 +173,6 @@ class MainActivity : ComponentActivity() {
                                     )
                                 }
                             )
-
                         }
                     }
                 }
