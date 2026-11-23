@@ -19,6 +19,7 @@ import androidx.navigation.navArgument
 
 import com.example.controldegastos.di.AppContainer
 import com.example.controldegastos.di.ViewModelFactory
+import com.example.controldegastos.ui.agregargasto.AgregarGastoViewModel
 import com.example.controldegastos.ui.dashboard.DashboardViewModel
 import com.example.controldegastos.ui.theme.ControlDeGastosTheme
 
@@ -33,7 +34,7 @@ class MainActivity : ComponentActivity() {
                 AppContainer()
             }
 
-            val dashboardFactory = remember(appContainer) {
+            val viewModelFactory = remember(appContainer) {
                 ViewModelFactory(
                     appContainer.gastosRepository
                 )
@@ -53,7 +54,7 @@ class MainActivity : ComponentActivity() {
                         startDestination = Screen.Login.route
                     ) {
 
-                        // 1. LOGIN
+                        // PANTALLA DE INICIO DE SESIÓN
                         composable(Screen.Login.route) {
 
                             LoginScreen(
@@ -66,7 +67,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        // 2. DASHBOARD
+                        // PANTALLA PRINCIPAL
                         composable(
                             route = "${Screen.Dashboard.route}/{username}",
                             arguments = listOf(
@@ -82,12 +83,12 @@ class MainActivity : ComponentActivity() {
 
                             val dashboardViewModel:
                                     DashboardViewModel = viewModel(
-                                factory = dashboardFactory
+                                factory = viewModelFactory
                             )
 
-                            val uiState = dashboardViewModel
-                                .uiState
-                                .collectAsStateWithLifecycle()
+                            val uiState =
+                                dashboardViewModel.uiState
+                                    .collectAsStateWithLifecycle()
 
                             LaunchedEffect(
                                 dashboardViewModel,
@@ -102,21 +103,50 @@ class MainActivity : ComponentActivity() {
                                 username = username,
                                 uiState = uiState.value,
                                 onNavigateToAdd = {
+
                                     navController.navigate(
-                                        Screen.AgregarGasto.route
+                                        "${Screen.AgregarGasto.route}/$username"
                                     )
                                 }
                             )
                         }
 
-                        // 3. AGREGAR GASTO
+                        // PANTALLA PARA AGREGAR GASTOS
                         composable(
-                            Screen.AgregarGasto.route
-                        ) {
+                            route = "${Screen.AgregarGasto.route}/{username}",
+                            arguments = listOf(
+                                navArgument("username") {
+                                    type = NavType.StringType
+                                }
+                            )
+                        ) { backStackEntry ->
+
+                            val username =
+                                backStackEntry.arguments
+                                    ?.getString("username") ?: ""
+
+                            val agregarGastoViewModel:
+                                    AgregarGastoViewModel = viewModel(
+                                factory = viewModelFactory
+                            )
+
+                            val agregarUiState =
+                                agregarGastoViewModel.uiState
+                                    .collectAsStateWithLifecycle()
+
+                            LaunchedEffect(
+                                agregarUiState.value.guardadoExitosamente
+                            ) {
+                                if (
+                                    agregarUiState.value.guardadoExitosamente
+                                ) {
+                                    navController.popBackStack()
+                                }
+                            }
 
                             AgregarGastoScreen(
                                 onGastoGuardado = {
-                                    navController.popBackStack()
+                                    // Se conectará en el paso 15.4
                                 }
                             )
                         }
