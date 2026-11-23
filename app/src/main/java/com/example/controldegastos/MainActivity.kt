@@ -55,7 +55,7 @@ class MainActivity : ComponentActivity() {
                         startDestination = Screen.Login.route
                     ) {
 
-                        // PANTALLA DE INICIO DE SESIÓN
+                        // 1. PANTALLA DE INICIO DE SESIÓN
                         composable(Screen.Login.route) {
 
                             val loginViewModel: LoginViewModel = viewModel(
@@ -66,19 +66,40 @@ class MainActivity : ComponentActivity() {
                                 loginViewModel.uiState
                                     .collectAsStateWithLifecycle()
 
-                            // La validación se conectará
-                            // al ViewModel en el paso 16.3
-                            LoginScreen(
-                                onLoginSuccess = { username ->
+                            // Navegar cuando el inicio de sesión sea correcto
+                            LaunchedEffect(
+                                loginUiState.value.loginExitoso
+                            ) {
+                                if (loginUiState.value.loginExitoso) {
+
+                                    val username =
+                                        loginUiState.value.username
 
                                     navController.navigate(
                                         "${Screen.Dashboard.route}/$username"
+                                    ) {
+                                        popUpTo(Screen.Login.route) {
+                                            inclusive = true
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Formulario conectado con LoginViewModel
+                            LoginScreen(
+                                cargando = loginUiState.value.cargando,
+                                error = loginUiState.value.error,
+                                onIniciarSesion = { username, contrasena ->
+
+                                    loginViewModel.iniciarSesion(
+                                        username = username,
+                                        contrasena = contrasena
                                     )
                                 }
                             )
                         }
 
-                        // PANTALLA PRINCIPAL
+                        // 2. PANTALLA PRINCIPAL
                         composable(
                             route = "${Screen.Dashboard.route}/{username}",
                             arguments = listOf(
@@ -122,7 +143,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        // PANTALLA PARA AGREGAR GASTOS
+                        // 3. PANTALLA PARA AGREGAR GASTOS
                         composable(
                             route = "${Screen.AgregarGasto.route}/{username}",
                             arguments = listOf(
@@ -145,6 +166,7 @@ class MainActivity : ComponentActivity() {
                                 agregarGastoViewModel.uiState
                                     .collectAsStateWithLifecycle()
 
+                            // Regresar al Dashboard después de guardar
                             LaunchedEffect(
                                 agregarUiState.value.guardadoExitosamente
                             ) {

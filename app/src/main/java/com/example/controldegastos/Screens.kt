@@ -57,13 +57,21 @@ val usuariosRegistrados = listOf(
 )
 
 // 1. PANTALLA DE INICIO DE SESIÓN
+
+
 @Composable
 fun LoginScreen(
-    onLoginSuccess: (String) -> Unit
+    cargando: Boolean,
+    error: String?,
+    onIniciarSesion: (String, String) -> Unit
 ) {
-    var username by remember { mutableStateOf("") }
-    var contrasena by remember { mutableStateOf("") }
-    var mensajeError by remember { mutableStateOf("") }
+    var username by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var contrasena by rememberSaveable {
+        mutableStateOf("")
+    }
 
     Column(
         modifier = Modifier
@@ -72,6 +80,7 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+
         Text(
             text = "Control de Gastos",
             style = MaterialTheme.typography.headlineLarge
@@ -81,11 +90,10 @@ fun LoginScreen(
 
         OutlinedTextField(
             value = username,
-            onValueChange = {
-                username = it
-                mensajeError = ""
-            },
+            onValueChange = { username = it },
             label = { Text("Usuario") },
+            singleLine = true,
+            enabled = !cargando,
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -93,19 +101,19 @@ fun LoginScreen(
 
         OutlinedTextField(
             value = contrasena,
-            onValueChange = {
-                contrasena = it
-                mensajeError = ""
-            },
+            onValueChange = { contrasena = it },
             label = { Text("Contraseña") },
             visualTransformation = PasswordVisualTransformation(),
+            singleLine = true,
+            enabled = !cargando,
             modifier = Modifier.fillMaxWidth()
         )
 
-        if (mensajeError.isNotEmpty()) {
+        if (error != null) {
             Spacer(modifier = Modifier.height(8.dp))
+
             Text(
-                text = mensajeError,
+                text = error,
                 color = MaterialTheme.colorScheme.error
             )
         }
@@ -114,27 +122,22 @@ fun LoginScreen(
 
         Button(
             onClick = {
-                val usuarioEncontrado =
-                    usuariosRegistrados.find {
-                        it.username.equals(
-                            username.trim(),
-                            ignoreCase = true
-                        ) && it.contrasena == contrasena
-                    }
-
-                if (usuarioEncontrado != null) {
-                    onLoginSuccess(usuarioEncontrado.username)
-                } else {
-                    mensajeError =
-                        "Usuario o contraseña incorrectos"
-                }
+                onIniciarSesion(
+                    username,
+                    contrasena
+                )
             },
+            enabled = !cargando,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Iniciar Sesión")
+            Text(
+                if (cargando) "Iniciando sesión..."
+                else "Iniciar Sesión"
+            )
         }
     }
 }
+
 
 // 2. DASHBOARD CON ARQUITECTURA MVVM
 @Composable
