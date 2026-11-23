@@ -3,12 +3,14 @@ package com.example.controldegastos.di
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.controldegastos.data.repository.GastosRepository
+import com.example.controldegastos.data.repository.UsuariosRepository
 import com.example.controldegastos.ui.agregargasto.AgregarGastoViewModel
 import com.example.controldegastos.ui.dashboard.DashboardViewModel
 import com.example.controldegastos.ui.login.LoginViewModel
 
 class ViewModelFactory(
-    private val repository: GastosRepository
+    private val gastosRepository: GastosRepository,
+    private val usuariosRepository: UsuariosRepository
 ) : ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(
@@ -20,7 +22,7 @@ class ViewModelFactory(
             )
         ) {
             @Suppress("UNCHECKED_CAST")
-            return DashboardViewModel(repository) as T
+            return DashboardViewModel(gastosRepository) as T
         }
 
         if (modelClass.isAssignableFrom(
@@ -28,7 +30,7 @@ class ViewModelFactory(
             )
         ) {
             @Suppress("UNCHECKED_CAST")
-            return AgregarGastoViewModel(repository) as T
+            return AgregarGastoViewModel(gastosRepository) as T
         }
 
         if (modelClass.isAssignableFrom(
@@ -36,7 +38,7 @@ class ViewModelFactory(
             )
         ) {
             @Suppress("UNCHECKED_CAST")
-            return LoginViewModel() as T
+            return LoginViewModel(usuariosRepository) as T
         }
 
         throw IllegalArgumentException(

@@ -31,13 +31,16 @@ class MainActivity : ComponentActivity() {
 
         setContent {
 
+            // CONTENEDOR DE DEPENDENCIAS
             val appContainer = remember {
                 AppContainer()
             }
 
+            // FACTORY PARA LOS TRES VIEWMODELS
             val viewModelFactory = remember(appContainer) {
                 ViewModelFactory(
-                    appContainer.gastosRepository
+                    gastosRepository = appContainer.gastosRepository,
+                    usuariosRepository = appContainer.usuariosRepository
                 )
             }
 
@@ -66,7 +69,6 @@ class MainActivity : ComponentActivity() {
                                 loginViewModel.uiState
                                     .collectAsStateWithLifecycle()
 
-                            // Navegar cuando el inicio de sesión sea correcto
                             LaunchedEffect(
                                 loginUiState.value.loginExitoso
                             ) {
@@ -85,7 +87,6 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
 
-                            // Formulario conectado con LoginViewModel
                             LoginScreen(
                                 cargando = loginUiState.value.cargando,
                                 error = loginUiState.value.error,
@@ -126,9 +127,7 @@ class MainActivity : ComponentActivity() {
                                 dashboardViewModel,
                                 username
                             ) {
-                                dashboardViewModel.cargarGastos(
-                                    username
-                                )
+                                dashboardViewModel.cargarGastos(username)
                             }
 
                             DashboardScreen(
@@ -166,7 +165,6 @@ class MainActivity : ComponentActivity() {
                                 agregarGastoViewModel.uiState
                                     .collectAsStateWithLifecycle()
 
-                            // Regresar al Dashboard después de guardar
                             LaunchedEffect(
                                 agregarUiState.value.guardadoExitosamente
                             ) {

@@ -2,6 +2,8 @@ package com.example.controldegastos.ui.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.controldegastos.data.repository.UsuariosRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,7 +16,9 @@ data class LoginUiState(
     val error: String? = null
 )
 
-class LoginViewModel : ViewModel() {
+class LoginViewModel(
+    private val usuariosRepository: UsuariosRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())
 
@@ -25,6 +29,9 @@ class LoginViewModel : ViewModel() {
         username: String,
         contrasena: String
     ) {
+
+        if (_uiState.value.cargando) return
+
         if (username.isBlank() || contrasena.isBlank()) {
             _uiState.value = LoginUiState(
                 error = "Complete todos los campos"
@@ -38,23 +45,35 @@ class LoginViewModel : ViewModel() {
                 cargando = true
             )
 
-            // Usuarios de prueba de la aplicación
-            val usuarios = mapOf(
-                "sofia" to "17012007",
-                "aura" to "02092004",
-                "alexis" to "12122024"
-            )
+            try {
 
-            val usuario = username.trim().lowercase()
+                val usuario =
+                    usuariosRepository.autenticarUsuario(
+                        username = username,
+                        contrasena = contrasena
+                    )
 
-            if (usuarios[usuario] == contrasena) {
+                if (usuario != null) {
+
+                    _uiState.value = LoginUiState(
+                        loginExitoso = true,
+                        username = usuario.username
+                    )
+
+                } else {
+
+                    _uiState.value = LoginUiState(
+                        error = "Usuario o contraseña incorrectos"
+                    )
+                }
+
+            } catch (e: CancellationException) {
+                throw e
+
+            } catch (e: Exception) {
+
                 _uiState.value = LoginUiState(
-                    loginExitoso = true,
-                    username = usuario
-                )
-            } else {
-                _uiState.value = LoginUiState(
-                    error = "Usuario o contraseña incorrectos"
+                    error = "No se pudo iniciar sesión"
                 )
             }
         }
