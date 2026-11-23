@@ -24,6 +24,8 @@ import com.example.controldegastos.ui.dashboard.DashboardViewModel
 import com.example.controldegastos.ui.login.LoginViewModel
 import com.example.controldegastos.ui.theme.ControlDeGastosTheme
 
+
+//etapa 3
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
